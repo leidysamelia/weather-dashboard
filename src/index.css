@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #1a1a2e;
+  --bg-card: rgba(255, 255, 255, 0.08);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --accent: #6c63ff;
+  --border: rgba(255, 255, 255, 0.12);
+  --gradient-from: #1a1a2e;
+  --gradient-to: #16213e;
+  --shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+/* Sunny / Clear */
+[data-theme="sunny"] {
+  --bg-primary: #ff6b35;
+  --bg-card: rgba(255, 255, 255, 0.15);
+  --text-primary: #ffffff;
+  --text-secondary: rgba(255, 255, 255, 0.75);
+  --accent: #ffd166;
+  --border: rgba(255, 255, 255, 0.2);
+  --gradient-from: #ff6b35;
+  --gradient-to: #f7931e;
+  --shadow: 0 8px 32px rgba(255, 107, 53, 0.35);
+}
+
+/* Cloudy / Overcast */
+[data-theme="cloudy"] {
+  --bg-primary: #4a5568;
+  --bg-card: rgba(255, 255, 255, 0.1);
+  --text-primary: #f7fafc;
+  --text-secondary: rgba(247, 250, 252, 0.65);
+  --accent: #a0aec0;
+  --border: rgba(255, 255, 255, 0.12);
+  --gradient-from: #4a5568;
+  --gradient-to: #2d3748;
+  --shadow: 0 8px 32px rgba(74, 85, 104, 0.35);
+}
+
+/* Rainy */
+[data-theme="rainy"] {
+  --bg-primary: #1a365d;
+  --bg-card: rgba(255, 255, 255, 0.08);
+  --text-primary: #ebf8ff;
+  --text-secondary: rgba(235, 248, 255, 0.65);
+  --accent: #63b3ed;
+  --border: rgba(99, 179, 237, 0.2);
+  --gradient-from: #1a365d;
+  --gradient-to: #2a4a7f;
+  --shadow: 0 8px 32px rgba(26, 54, 93, 0.45);
+}
+
+/* Stormy */
+[data-theme="stormy"] {
+  --bg-primary: #1a1a2e;
+  --bg-card: rgba(255, 255, 255, 0.06);
+  --text-primary: #e2e8f0;
+  --text-secondary: rgba(226, 232, 240, 0.6);
+  --accent: #805ad5;
+  --border: rgba(128, 90, 213, 0.25);
+  --gradient-from: #1a1a2e;
+  --gradient-to: #2d1b69;
+  --shadow: 0 8px 32px rgba(26, 26, 46, 0.5);
+}
+
+/* Snowy */
+[data-theme="snowy"] {
+  --bg-primary: #e8f4fd;
+  --bg-card: rgba(255, 255, 255, 0.6);
+  --text-primary: #2c5282;
+  --text-secondary: rgba(44, 82, 130, 0.7);
+  --accent: #4299e1;
+  --border: rgba(66, 153, 225, 0.25);
+  --gradient-from: #e8f4fd;
+  --gradient-to: #bee3f8;
+  --shadow: 0 8px 32px rgba(66, 153, 225, 0.2);
+}
+
+/* Foggy / Mist */
+[data-theme="foggy"] {
+  --bg-primary: #718096;
+  --bg-card: rgba(255, 255, 255, 0.12);
+  --text-primary: #f7fafc;
+  --text-secondary: rgba(247, 250, 252, 0.65);
+  --accent: #cbd5e0;
+  --border: rgba(255, 255, 255, 0.15);
+  --gradient-from: #718096;
+  --gradient-to: #4a5568;
+  --shadow: 0 8px 32px rgba(113, 128, 150, 0.35);
+}
+
+/* Night / Clear Night */
+[data-theme="night"] {
+  --bg-primary: #0f0c29;
+  --bg-card: rgba(255, 255, 255, 0.07);
+  --text-primary: #e2e8f0;
+  --text-secondary: rgba(226, 232, 240, 0.6);
+  --accent: #b794f4;
+  --border: rgba(183, 148, 244, 0.2);
+  --gradient-from: #0f0c29;
+  --gradient-to: #302b63;
+  --shadow: 0 8px 32px rgba(15, 12, 41, 0.6);
+}
+
+* {
+  font-family: 'Inter', system-ui, sans-serif;
+  transition: background-color 0.5s ease, color 0.5s ease, border-color 0.5s ease;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: linear-gradient(135deg, var(--gradient-from), var(--gradient-to));
+  color: var(--text-primary);
+}
+
+.weather-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 1.5rem;
+  transition: background 0.5s ease, border-color 0.5s ease, box-shadow 0.5s ease;
+}
+
+.search-input {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text-primary);
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.search-btn {
+  background: var(--accent);
+  color: white;
+  transition: opacity 0.2s ease, transform 0.1s ease;
+}
+
+.search-btn:hover:not(:disabled) {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}
+
+.search-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.text-primary { color: var(--text-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-accent { color: var(--accent); }
+.border-theme { border-color: var(--border); }
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.4s ease both;
+}

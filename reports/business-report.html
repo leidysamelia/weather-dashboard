@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weather Dashboard — Reporte de Pruebas Unitarias</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #f8fafc;
+      color: #1e293b;
+      line-height: 1.6;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .top-bar {
+      background: linear-gradient(135deg, #1e293b, #334155);
+      color: #fff;
+      padding: 2rem;
+      text-align: center;
+    }
+    .top-bar h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: .25rem; }
+    .top-bar .subtitle { opacity: .7; font-size: .9rem; }
+    .top-bar .generated { opacity: .5; font-size: .8rem; margin-top: .5rem; }
+
+    .overall-banner {
+      padding: 1rem 2rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-align: center;
+      color: #22c55e;
+      background: #f0fdf4;
+      border-bottom: 2px solid #22c55e40;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+      padding: 1.5rem 2rem;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    .summary-card {
+      background: #fff;
+      border-radius: .75rem;
+      padding: 1rem;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border: 1px solid #e2e8f0;
+    }
+    .summary-card .value { font-size: 2rem; font-weight: 700; }
+    .summary-card .label { font-size: .75rem; color: #64748b; text-transform: uppercase; letter-spacing: .05em; }
+
+    .suites-wrapper { max-width: 900px; margin: 0 auto; padding: 0 2rem 3rem; }
+
+    .suite {
+      background: #fff;
+      border-radius: 1rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.08);
+      border: 1px solid #e2e8f0;
+      overflow: hidden;
+    }
+    .suite-pass { border-left: 4px solid #22c55e; }
+    .suite-fail { border-left: 4px solid #ef4444; }
+
+    .suite-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid #f1f5f9;
+      flex-wrap: wrap;
+      gap: .5rem;
+    }
+    .suite-title { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .suite-title h2 { font-size: 1.05rem; font-weight: 600; }
+    .suite-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .file-name {
+      font-size: .75rem;
+      background: #f1f5f9;
+      padding: .15rem .5rem;
+      border-radius: .375rem;
+      color: #475569;
+    }
+    .risk-badge {
+      font-size: .72rem;
+      font-weight: 600;
+      border: 1.5px solid;
+      border-radius: 999px;
+      padding: .2rem .65rem;
+    }
+
+    .business-box {
+      margin: 1rem 1.5rem;
+      padding: .875rem 1rem;
+      background: #f8fafc;
+      border-radius: .625rem;
+      border-left: 3px solid #6366f1;
+    }
+    .business-label { font-size: .72rem; font-weight: 700; color: #6366f1; text-transform: uppercase; letter-spacing: .06em; display: block; margin-bottom: .25rem; }
+    .business-box p { font-size: .875rem; color: #475569; }
+
+    .suite-stats {
+      display: flex;
+      gap: 1.5rem;
+      padding: .5rem 1.5rem;
+      font-size: .8rem;
+      color: #64748b;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .suite-stats span::before { content: '· '; }
+    .suite-stats span:first-child::before { content: ''; }
+
+    .tests-table { width: 100%; border-collapse: collapse; }
+    .tests-table th {
+      background: #f8fafc;
+      padding: .6rem 1rem;
+      font-size: .75rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      text-align: left;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .test-row td {
+      padding: .625rem 1rem;
+      border-bottom: 1px solid #f8fafc;
+      font-size: .875rem;
+      vertical-align: top;
+    }
+    .test-row:last-child td { border-bottom: none; }
+    .test-row.failed { background: #fff8f8; }
+    .test-row.passed:hover { background: #f8fafc; }
+    .test-status { width: 110px; }
+    .test-duration { width: 70px; color: #94a3b8; font-size: .8rem; }
+    .ancestor { color: #94a3b8; font-size: .8rem; }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: .25rem;
+      padding: .2rem .55rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+    }
+
+    .failure-msg {
+      background: #fef2f2;
+      border: 1px solid #fecaca;
+      border-radius: .5rem;
+      padding: .75rem;
+      font-size: .78rem;
+      color: #b91c1c;
+      white-space: pre-wrap;
+      word-break: break-word;
+      margin: .25rem .5rem .5rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .8rem;
+      color: #94a3b8;
+      border-top: 1px solid #e2e8f0;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-bar">
+    <h1>🌤 Weather Dashboard</h1>
+    <div class="subtitle">Reporte de Pruebas Unitarias</div>
+    <div class="generated">Generado el miércoles, 24 de junio de 2026, 8:37</div>
+  </div>
+
+  <div class="overall-banner">✓ TODAS LAS PRUEBAS PASARON</div>
+
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="value" style="color:#6366f1">63</div>
+      <div class="label">Total pruebas</div>
+    </div>
+    <div class="summary-card">
+      <div class="value" style="color:#22c55e">63</div>
+      <div class="label">Pasaron</div>
+    </div>
+    <div class="summary-card">
+      <div class="value" style="color:#22c55e">0</div>
+      <div class="label">Fallaron</div>
+    </div>
+    <div class="summary-card">
+      <div class="value" style="color:#6366f1">3</div>
+      <div class="label">Suites</div>
+    </div>
+    <div class="summary-card">
+      <div class="value" style="color:#22c55e">3</div>
+      <div class="label">Suites OK</div>
+    </div>
+    <div class="summary-card">
+      <div class="value" style="color:#64748b">198ms</div>
+      <div class="label">Tiempo total</div>
+    </div>
+  </div>
+
+  <div class="suites-wrapper">
+    <h2 style="font-size:1rem;color:#64748b;margin-bottom:1rem;font-weight:500">
+      Resultados por módulo de negocio
+    </h2>
+    
+      <section class="suite suite-pass">
+        <div class="suite-header">
+          <div class="suite-title">
+            <span class="suite-status-dot" style="background:#22c55e"></span>
+            <h2>Interpretación de Búsqueda del Usuario</h2>
+            <code class="file-name">parseLocation.test.js</code>
+          </div>
+          <span class="risk-badge" style="border-color:#ef4444;color:#ef4444">
+            Riesgo Alto
+          </span>
+        </div>
+
+        <div class="business-box">
+          <span class="business-label">📋 Propósito de negocio</span>
+          <p>Garantiza que el parser entiende inputs en español e inglés y los convierte al formato que espera la API de geocodificación, maximizando el éxito de cada búsqueda.</p>
+        </div>
+
+        <div class="suite-stats">
+          <span>10 pasaron</span>
+          <span>0 fallaron</span>
+          <span>154ms</span>
+        </div>
+
+        <table class="tests-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Prueba</th>
+              <th>Tiempo</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              extrae y capitaliza la ciudad desde &quot;Ciudad, País&quot;
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              devuelve solo la ciudad cuando no hay parte de país
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              traduce nombres de ciudades en español a inglés (Nueva York → New York)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              traduce &quot;Ciudad de México&quot; a &quot;Mexico City&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              traduce &quot;Rio de Janeiro&quot; correctamente
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              traduce el país de español a inglés (España → Spain)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              traduce &quot;Alemania&quot; a &quot;Germany&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              traduce &quot;Francia&quot; a &quot;France&quot; (preserva tilde del input original)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              elimina espacios extra alrededor de ciudad y país
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">parseLocation() — Normalización del input de búsqueda</span> › 
+              devuelve string vacío si el input está vacío
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="suite suite-pass">
+        <div class="suite-header">
+          <div class="suite-title">
+            <span class="suite-status-dot" style="background:#22c55e"></span>
+            <h2>Capa de Transformación de Datos</h2>
+            <code class="file-name">weatherTransform.test.js</code>
+          </div>
+          <span class="risk-badge" style="border-color:#ef4444;color:#ef4444">
+            Riesgo Alto
+          </span>
+        </div>
+
+        <div class="business-box">
+          <span class="business-label">📋 Propósito de negocio</span>
+          <p>Valida que los datos crudos de Open-Meteo se normalizan correctamente antes de llegar a la UI. Un fallo aquí provocaría temperaturas incorrectas, iconos erróneos o textos confusos para el usuario final.</p>
+        </div>
+
+        <div class="suite-stats">
+          <span>30 pasaron</span>
+          <span>0 fallaron</span>
+          <span>21ms</span>
+        </div>
+
+        <table class="tests-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Prueba</th>
+              <th>Tiempo</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              extrae el nombre de la ciudad sin modificarlo
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              convierte el country_code a mayúsculas (es → ES)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              redondea la temperatura actual al entero más cercano
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              redondea la sensación térmica al entero más cercano
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              convierte is_day=1 (número) a true (booleano)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              convierte is_day=0 (número) a false (booleano)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              asigna la descripción correcta al código WMO 0 (cielo despejado)
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              asigna descripción correcta al código WMO 61 (lluvia ligera)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              asigna descripción correcta al código WMO 95 (tormenta eléctrica)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              usa &quot;Condición desconocida&quot; para códigos WMO no reconocidos
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              incluye temperatura mínima y máxima del día redondeadas
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              usa 0° como dirección de viento por defecto si no llega el dato
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">normalizeWeatherData() — Normalización de la respuesta de la API</span> › 
+              expone null cuando la API no devuelve dato de visibilidad
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">formatVisibility() — Formato de visibilidad para el usuario</span> › 
+              muestra en km con un decimal cuando visibilidad ≥ 1000 m
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">formatVisibility() — Formato de visibilidad para el usuario</span> › 
+              muestra en metros cuando visibilidad &lt; 1000 m
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">formatVisibility() — Formato de visibilidad para el usuario</span> › 
+              retorna &quot;—&quot; cuando no hay dato de visibilidad
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              rechaza entrada vacía (string vacío)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              rechaza entrada nula o no-string
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              rechaza entradas de 1 solo carácter
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              rechaza entradas que contienen únicamente números
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              rechaza entradas que superan los 100 caracteres
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              acepta un nombre de ciudad simple (formato &quot;Ciudad&quot;)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              acepta el formato &quot;Ciudad, País&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">validateLocationInput() — Validación de entrada del usuario</span> › 
+              elimina espacios al inicio y al final antes de validar
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">degreesToCardinal() — Conversión de grados a punto cardinal</span> › 
+              convierte 0° a Norte (N)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">degreesToCardinal() — Conversión de grados a punto cardinal</span> › 
+              convierte 90° a Este (E)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">degreesToCardinal() — Conversión de grados a punto cardinal</span> › 
+              convierte 180° a Sur (S)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">degreesToCardinal() — Conversión de grados a punto cardinal</span> › 
+              convierte 220° a Suroeste (SO)
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">degreesToCardinal() — Conversión de grados a punto cardinal</span> › 
+              convierte 360° a Norte (N) — equivalencia circular
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">degreesToCardinal() — Conversión de grados a punto cardinal</span> › 
+              retorna &quot;—&quot; cuando el dato es null o NaN
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="suite suite-pass">
+        <div class="suite-header">
+          <div class="suite-title">
+            <span class="suite-status-dot" style="background:#22c55e"></span>
+            <h2>Sistema de Temas Visuales</h2>
+            <code class="file-name">weatherTheme.test.js</code>
+          </div>
+          <span class="risk-badge" style="border-color:#f59e0b;color:#f59e0b">
+            Riesgo Medio
+          </span>
+        </div>
+
+        <div class="business-box">
+          <span class="business-label">📋 Propósito de negocio</span>
+          <p>Verifica que cada condición climática activa el esquema de colores correcto (sunny, rainy, stormy, etc.) y que el icono emoji asociado es el apropiado. Un fallo rompería la identidad visual dinámica de la aplicación.</p>
+        </div>
+
+        <div class="suite-stats">
+          <span>23 pasaron</span>
+          <span>0 fallaron</span>
+          <span>23ms</span>
+        </div>
+
+        <table class="tests-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Prueba</th>
+              <th>Tiempo</th>
+            </tr>
+          </thead>
+          <tbody>
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 0 (despejado) de día → tema &quot;sunny&quot;
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 1 (principalmente despejado) de día → tema &quot;sunny&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 0 (despejado) de noche → tema &quot;night&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 1 (principalmente despejado) de noche → tema &quot;night&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 2 (parcialmente nublado) → tema &quot;cloudy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 3 (nublado) → tema &quot;cloudy&quot;
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 45 (niebla) → tema &quot;foggy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 48 (niebla con escarcha) → tema &quot;foggy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 51 (llovizna ligera) → tema &quot;rainy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 63 (lluvia moderada) → tema &quot;rainy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 80 (chubascos ligeros) → tema &quot;rainy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 71 (nevada ligera) → tema &quot;snowy&quot;
+            </td>
+            <td class="test-duration">1ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 75 (nevada intensa) → tema &quot;snowy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 95 (tormenta eléctrica) → tema &quot;stormy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherTheme() — Selección de tema según condición climática</span> › 
+              código 99 (tormenta con granizo) → tema &quot;stormy&quot;
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código 0 de día → icono ☀️
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código 0 de noche → icono 🌙
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código 2 (parcialmente nublado) → icono ⛅
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código 63 (lluvia moderada) → icono 🌧️
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código 75 (nevada intensa) → icono ❄️
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código 95 (tormenta) → icono ⛈️
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código 45 (niebla) → icono 🌫️
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          
+          <tr class="test-row passed">
+            <td class="test-status"><span class="badge" style="color:#22c55e;background:#f0fdf4;border:1px solid #22c55e30">✓ passed</span></td>
+            <td class="test-name">
+              <span class="ancestor">getWeatherIcon() — Selección de icono representativo</span> › 
+              código desconocido → icono fallback 🌡️
+            </td>
+            <td class="test-duration">0ms</td>
+          </tr>
+          </tbody>
+        </table>
+      </section>
+  </div>
+
+  <footer>
+    Generado por <strong>scripts/generate-report.js</strong> · Weather Dashboard © 2026
+  </footer>
+
+</body>
+</html>
