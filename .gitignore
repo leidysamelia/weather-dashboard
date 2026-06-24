@@ -1,6 +1,7 @@
 node_modules/
 dist/
 reports/
+public/reports/*.json
 .env
 *.local
 .DS_Store

@@ -12,7 +12,7 @@ module.exports = {
     [
       'jest-html-reporters',
       {
-        publicPath: './reports',
+        publicPath: './public/reports',
         filename: 'test-report.html',
         expand: true,
         pageTitle: 'Weather Dashboard — Reporte de Pruebas Unitarias',

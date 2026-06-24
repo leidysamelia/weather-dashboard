@@ -19,6 +19,8 @@ export default function App() {
     rootRef.current.setAttribute('data-theme', theme)
   }, [data])
 
+  const base = import.meta.env.BASE_URL
+
   return (
     <div className="min-h-screen flex flex-col items-center justify-start px-4 py-12 gap-10">
       <header className="text-center">
@@ -32,12 +34,33 @@ export default function App() {
 
       <SearchBar onSearch={fetchWeather} loading={loading} />
 
-      <main className="w-full flex justify-center">
+      <main className="w-full flex flex-col items-center justify-center gap-6 flex-1">
         {loading && <LoadingState />}
         {!loading && error && <ErrorMessage message={error} />}
         {!loading && !error && data && <WeatherCard data={data} />}
         {!loading && !error && !data && <EmptyState />}
       </main>
+
+      <footer className="pb-6 flex gap-3">
+        <a
+          href={`${base}reports/business-report.html`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="report-btn"
+          title="Dashboard de pruebas unitarias"
+        >
+          Dash
+        </a>
+        <a
+          href={`${base}reports/test-report.html`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="report-btn"
+          title="Reporte técnico de tests"
+        >
+          Test
+        </a>
+      </footer>
     </div>
   )
 }

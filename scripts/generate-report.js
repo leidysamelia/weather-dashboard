@@ -16,7 +16,7 @@ import { fileURLToPath } from 'url'
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const INPUT = resolve(ROOT, 'reports', 'jest-results.json')
-const OUTPUT = resolve(ROOT, 'reports', 'business-report.html')
+const OUTPUT = resolve(ROOT, 'public', 'reports', 'business-report.html')
 
 // ─── Metadatos de negocio por suite ──────────────────────────────────────────
 // Asocia el nombre del archivo de test con descripción de negocio y área.
