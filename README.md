@@ -2,6 +2,8 @@
 
 Aplicación web responsiva y minimalista para consultar el clima en tiempo real de cualquier ciudad del mundo. Construida con **React + Vite + Tailwind CSS**, sin necesidad de API key.
 
+![CI](https://github.com/leidysamelia/weather-dashboard/actions/workflows/ci.yml/badge.svg)
+
 ---
 
 ## ✨ Características
